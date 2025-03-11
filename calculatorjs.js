@@ -11,14 +11,14 @@ buttons.forEach(button => {
     });
 });
 
-function value_calculations(left, operator, right) {
+function value_calculations(left, opt, right) {
     left = parseFloat(left);
     right = parseFloat(right);
     
-    if (operator === "*") return left * right;
-    if (operator === "/") return right === 0 ? "Error " : left / right;
-    if (operator === "+") return left + right;
-    if (operator === "-") return left - right;
+    if (opt === "*") return left * right;
+    if (opt === "/") return right === 0 ? "Error " : left / right;
+    if (opt === "+") return left + right;
+    if (opt === "-") return left - right;
 }
 
 function evaluate_expressions(exp, operators) {
@@ -48,15 +48,15 @@ function evaluate_expressions(exp, operators) {
 
 function apply_BODMAS(expression) {
     while (expression.includes("(")) {
-        let openIndex = expression.lastIndexOf("(");
-        let closeIndex = expression.indexOf(")", openIndex);
+        let open_braces = expression.lastIndexOf("(");
+        let close_braces = expression.indexOf(")", open_braces);
         
-        if (closeIndex === -1) return "Error ";
+        if (close_braces === -1) return "Error ";
         
-        let innerExpression = expression.slice(openIndex + 1, closeIndex);
-        let innerResult = apply_BODMAS(innerExpression);
+        let inside_braces = expression.slice(open_braces + 1, close_braces);
+        let innerResult = apply_BODMAS(inside_braces);
         
-        expression = expression.slice(0, openIndex) + innerResult + expression.slice(closeIndex + 1);
+        expression = expression.slice(0, open_braces) + innerResult + expression.slice(close_braces + 1);
     }
     
     expression = evaluate_expressions(expression, "*/");
