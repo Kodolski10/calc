@@ -1,4 +1,4 @@
-let expression = "";
+let expression = ""; //this is used to store all the operations that the user wants the calculator to perfrom
 const display = document.getElementById("display");
 const buttons = document.querySelectorAll(".btn");
 const equalsButton = document.getElementById("equals");
@@ -11,7 +11,7 @@ buttons.forEach(button => {
     });
 });
 
-function compute(left, operator, right) {
+function value_calculations(left, operator, right) {
     left = parseFloat(left);
     right = parseFloat(right);
     
@@ -21,7 +21,7 @@ function compute(left, operator, right) {
     if (operator === "-") return left - right;
 }
 
-function processOperators(exp, operators) {
+function evaluate_expressions(exp, operators) {
     let i = 0;
     while (i < exp.length) {
         if (operators.includes(exp[i])) {
@@ -35,7 +35,7 @@ function processOperators(exp, operators) {
             let operator = exp[i];
             let right = exp.slice(i + 1, rightEnd);
 
-            let result = compute(left, operator, right);
+            let result = value_calculations(left, operator, right);
             exp = exp.slice(0, leftStart + 1) + result + exp.slice(rightEnd);
             
             i = leftStart + result.toString().length;
@@ -46,7 +46,7 @@ function processOperators(exp, operators) {
     return exp;
 }
 
-function solve(expression) {
+function apply_BODMAS(expression) {
     while (expression.includes("(")) {
         let openIndex = expression.lastIndexOf("(");
         let closeIndex = expression.indexOf(")", openIndex);
@@ -54,20 +54,20 @@ function solve(expression) {
         if (closeIndex === -1) return "Error ";
         
         let innerExpression = expression.slice(openIndex + 1, closeIndex);
-        let innerResult = solve(innerExpression);
+        let innerResult = apply_BODMAS(innerExpression);
         
         expression = expression.slice(0, openIndex) + innerResult + expression.slice(closeIndex + 1);
     }
     
-    expression = processOperators(expression, "*/");
-    expression = processOperators(expression, "+-");
+    expression = evaluate_expressions(expression, "*/");
+    expression = evaluate_expressions(expression, "+-");
     
     return expression;
 }
 
 equalsButton.addEventListener("click", () => {
     if (expression && !/[*/+\-(]$/.test(expression)) {
-        expression = solve(expression);
+        expression = apply_BODMAS(expression);
         expression = expression.slice(0,-1);
         display.value = expression;
     }
