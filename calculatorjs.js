@@ -16,62 +16,59 @@ function compute(left, operator, right) {
     right = parseFloat(right);
     
     if (operator === "*") return left * right;
-    if (operator === "/") return right === 0 ? "Error" : left / right;
+    if (operator === "/") return right === 0 ? "Error " : left / right;
     if (operator === "+") return left + right;
     if (operator === "-") return left - right;
 }
 
 function processOperators(exp, operators) {
-    let newExp = [];
-    let num = "";
+    let i = 0;
+    while (i < exp.length) {
+        if (operators.includes(exp[i])) {
+            let leftStart = i - 1;
+            while (leftStart >= 0 && (/[0-9.]/.test(exp[leftStart]))) leftStart--;
 
-    for (let i = 0; i < exp.length; i++) {
-        if (["*", "/", "+", "-"].includes(exp[i])) {
-            newExp.push(num, exp[i]);
-            num = "";
+            let rightEnd = i + 1;
+            while (rightEnd < exp.length && (/[0-9.]/.test(exp[rightEnd]))) rightEnd++;
+
+            let left = exp.slice(leftStart + 1, i);
+            let operator = exp[i];
+            let right = exp.slice(i + 1, rightEnd);
+
+            let result = compute(left, operator, right);
+            exp = exp.slice(0, leftStart + 1) + result + exp.slice(rightEnd);
+            
+            i = leftStart + result.toString().length;
         } else {
-            num += exp[i];
-        }
-    }
-    newExp.push(num);
-
-    for (let op of operators) {
-        let i = 0;
-        while (i < newExp.length) {
-            if (newExp[i] === op) {
-                let result = compute(newExp[i - 1], newExp[i], newExp[i + 1]);
-                newExp.splice(i - 1, 3, result.toString());
-                i--; 
-            }
             i++;
         }
     }
-    return newExp[0];
+    return exp;
 }
 
 function solve(expression) {
-    let expArray = [];
-    let num = "";
-
-    for (let char of expression) {
-        if (["*", "/", "+", "-"].includes(char)) {
-            expArray.push(num, char);
-            num = "";
-        } else {
-            num += char;
-        }
+    while (expression.includes("(")) {
+        let openIndex = expression.lastIndexOf("(");
+        let closeIndex = expression.indexOf(")", openIndex);
+        
+        if (closeIndex === -1) return "Error ";
+        
+        let innerExpression = expression.slice(openIndex + 1, closeIndex);
+        let innerResult = solve(innerExpression);
+        
+        expression = expression.slice(0, openIndex) + innerResult + expression.slice(closeIndex + 1);
     }
-    expArray.push(num);
-
-    expression = processOperators(expArray, ["*", "/"]);
-    expression = processOperators(expression.split(" "), ["+", "-"]);
-
+    
+    expression = processOperators(expression, "*/");
+    expression = processOperators(expression, "+-");
+    
     return expression;
 }
 
 equalsButton.addEventListener("click", () => {
-    if (expression.length > 0 && !["*", "/", "+", "-"].includes(expression[expression.length - 1])) {
+    if (expression && !/[*/+\-(]$/.test(expression)) {
         expression = solve(expression);
+        expression = expression.slice(0,-1);
         display.value = expression;
     }
 });
